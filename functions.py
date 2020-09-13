@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
+import selenium.common.exceptions as selerr
 URLS = ["https://www.16personalities.com/free-personality-test",
 "http://easydamus.com/alignmenttest.html"
 ]
@@ -12,12 +12,14 @@ def mbti(driver, url):
     # Go to the results page once the survey is over
     driver.get("https://www.16personalities.com/profile")
 
-    # If the user clicked on a random link while doing the survey, an error will occur, so catch it and exit
+    # If the user clicked on a random link while doing the survey, an error will occur
+    # So go back to the survey page and try again
     try:
         result = driver.find_elements_by_tag_name("td")[4]
         code = result.text
     except IndexError:
-        return("Please don't click the hyperlinks, only do the quiz")
+        driver.get(url)
+        return mbti(driver, url)
     else:
         return(code)
 
@@ -36,10 +38,11 @@ def dnd(driver, url):
     # Switch to that window and extract the alignment
     driver.switch_to.window(handles[1])
     print("pog")
+    # An error will occur when closing the pop-up, so re-open it
     while(True):
         try:
             result = driver.find_elements_by_tag_name("b")[1]
-        except:
+        except selerr.NoSuchWindowException:
             driver.switch_to.window(driver.window_handles[0])
             btn.click()
             driver.switch_to.window(driver.window_handles[1])
@@ -60,5 +63,3 @@ def detect(site):
             return dnd(driver, URLS[site])
     except:
         return("Something went wrong, please try again")
-        
-print(detect(0))
