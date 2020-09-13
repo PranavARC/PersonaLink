@@ -11,6 +11,8 @@ driver = webdriver.Chrome(options = opts)
 driver.get(url)
 handles = []
 
+btn = driver.find_element_by_class_name("button")
+
 # Wait till the user finishes the survey and a pop-up window appears, making a second window handle
 while(True):
     handles = driver.window_handles
@@ -21,6 +23,15 @@ while(True):
 
 # Switch to that window and extract the alignment
 driver.switch_to.window(handles[1])
-result = driver.find_elements_by_tag_name("b")[1]
+print("pog")
+while(True):
+    try:
+        result = driver.find_elements_by_tag_name("b")[1]
+    except:
+        driver.switch_to.window(driver.window_handles[0])
+        btn.click()
+        driver.switch_to.window(driver.window_handles[1])
+    else:
+        break
 align = result.text
 print("Your alignment is: " + align)

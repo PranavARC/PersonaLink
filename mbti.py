@@ -21,7 +21,7 @@ driver.get("https://www.16personalities.com/profile")
 try:
     result = driver.find_elements_by_tag_name("td")[4]
     code = result.text
-except:
+except IndexError:
     print("There was an issue, please try again")
 else:
     print("Your type is: " + code)
