@@ -61,7 +61,10 @@ def enneagram(driver, url):
         handles = driver.window_handles
         if(len(handles) > 1):
             driver.switch_to.window(handles[1])
-            driver.close()
+            try:
+                driver.close()
+            except selerr.NoSuchWindowException:
+                pass
             driver.switch_to.window(handles[0])
 
         if(driver.current_url != url):
