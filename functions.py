@@ -1,8 +1,10 @@
+import re
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import selenium.common.exceptions as selerr
 URLS = ["https://www.16personalities.com/free-personality-test",
-"http://easydamus.com/alignmenttest.html"
+"http://easydamus.com/alignmenttest.html",
+"https://www.truity.com/test/enneagram-personality-test"
 ]
 
 def mbti(driver, url):
@@ -37,7 +39,6 @@ def dnd(driver, url):
 
     # Switch to that window and extract the alignment
     driver.switch_to.window(handles[1])
-    print("pog")
     # An error will occur when closing the pop-up, so re-open it
     while(True):
         try:
@@ -50,6 +51,31 @@ def dnd(driver, url):
             break
     return(result.text)
 
+def enneagram(driver, url):
+    # An RE of the results page (unique for each test)
+    endurl = re.compile("https://www.truity.com/personality-test/[0-9]+/test-results/[0-9]+")
+
+    # Until the user finishes the survey and until the survey page loads, wait
+    while(True):
+        # To deal with the user opening pop-ups
+        handles = driver.window_handles
+        if(len(handles) > 1):
+            driver.switch_to.window(handles[1])
+            driver.close()
+            driver.switch_to.window(handles[0])
+
+        if(driver.current_url != url):
+            if not(endurl.match(driver.current_url)):
+                driver.get(url)
+            elif(len(driver.find_elements_by_tag_name('h3')) > 0):
+                break
+    
+    result = (driver.find_elements_by_tag_name('p')[4]).text
+    begin = result.find("Your primary type is ") + len("Your primary type is ")
+    end = result.find(".", begin)
+    return("Type " + result[begin:end])
+    
+
 def detect(site):
     # Make sure the Chrome window is launched as an app (without navigation buttons or address bar)
     opts = Options()
@@ -61,5 +87,7 @@ def detect(site):
             return mbti(driver, URLS[site])
         elif(site == 1):
             return dnd(driver, URLS[site])
+        elif(site == 2):
+            return enneagram(driver, URLS[site])
     except:
         return("Something went wrong, please try again")

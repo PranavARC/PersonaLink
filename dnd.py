@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import selenium.common.exceptions as selerr
 
 # URL for D&D alignment test
 url = "http://easydamus.com/alignmenttest.html"
@@ -23,15 +24,17 @@ while(True):
 
 # Switch to that window and extract the alignment
 driver.switch_to.window(handles[1])
-print("pog")
+# An error will occur when closing the pop-up, so re-open it
 while(True):
     try:
         result = driver.find_elements_by_tag_name("b")[1]
-    except:
+    except selerr.NoSuchWindowException:
         driver.switch_to.window(driver.window_handles[0])
         btn.click()
         driver.switch_to.window(driver.window_handles[1])
     else:
         break
-align = result.text
-print("Your alignment is: " + align)
+print("Your alignment is " + result.text)
+
+# Close the window
+driver.quit()
