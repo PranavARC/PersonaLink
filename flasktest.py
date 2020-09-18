@@ -1,27 +1,20 @@
-from flask import Flask, request
+from flask import Flask, request, redirect, url_for, render_template
 import functions
 
 app = Flask(__name__)
 
-bro = "idk"
-stuff = ""
-
-webstring = """Let's begin \n <h1> """ + bro + """ 
-hey <h1>
-<form method="POST" action="send">
-    <input class="button" type="submit" value="submit">
-</form> """
-
-@app.route('/send', methods=['GET', 'POST'])
-def send():
-    if request.method == 'POST':
-        stuff = functions.detect(0)
-        
-    return "Here is your type: " + stuff
-
-@app.route("/")
+@app.route('/', methods=['GET', 'POST'])
 def bruh():
-    return webstring
+    if request.method == 'POST':
+        user = request.form["username"]
+        password = request.form["password"]
+        return redirect(url_for("send", usr = user, word = password))
+    else:
+        return render_template("root.html")
+
+@app.route('/login-<usr>-<word>')
+def send(usr, word):
+    return render_template("login.html", usr = usr, word = word)
 
 @app.route("/<name>")
 def rando(name):
@@ -29,4 +22,4 @@ def rando(name):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
