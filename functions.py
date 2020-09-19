@@ -87,10 +87,12 @@ def detect(site):
         driver = webdriver.Chrome(options = opts)
         driver.get(URLS[site])
         if(site == 0):
-            return mbti(driver, URLS[site])
+            answer = mbti(driver, URLS[site])
         elif(site == 1):
-            return dnd(driver, URLS[site])
+            answer = dnd(driver, URLS[site])
         elif(site == 2):
-            return enneagram(driver, URLS[site])
+            answer = enneagram(driver, URLS[site])
+        driver.quit()
+        return answer
     except:
         return("Something went wrong, please try again")
