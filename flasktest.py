@@ -3,13 +3,13 @@ from datetime import timedelta
 import functions
 
 app = Flask(__name__)
-app.secret_key = "bro"
+app.secret_key = "hello"
 app.permanent_session_lifetime = timedelta(minutes=3)
 
 @app.route('/', methods=['GET', 'POST'])
-def bruh():
+def main():
     if "user" in session:
-        return redirect(url_for("send"))    
+        return redirect(url_for("profile"))    
     if request.method == 'POST':
         session.permanent = True
         user = request.form["username"]
@@ -19,12 +19,12 @@ def bruh():
         session["mbti"] = "?"
         session["dnd"] = "?"
         session["types"] = "?"
-        return redirect(url_for("send"))
+        return redirect(url_for("profile"))
     else:
         return render_template("root.html")
 
-@app.route('/login', methods=['GET', 'POST'])
-def send():
+@app.route('/my-profile', methods=['GET', 'POST'])
+def profile():
     arr = ["","","","",""]
     if "user" in session:
         arr = [session["user"], session["password"], session["mbti"], session["dnd"], session["types"]]
@@ -35,7 +35,7 @@ def send():
             session["dnd"] = arr[3] = functions.detect(1)
         elif request.form.get("type"):
             session["types"] = arr[4] = functions.detect(2)
-    return render_template("login.html", arr = arr)
+    return render_template("profile.html", arr = arr)
 
 # @app.route("/<name>")
 # def rando(name):
