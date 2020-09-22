@@ -1,14 +1,15 @@
-from flask import Flask, request, redirect, url_for, render_template, session
+from flask import Flask, request, redirect, url_for, render_template, session, flash
 from datetime import timedelta
 import functions
 
 app = Flask(__name__)
 app.secret_key = "hello"
-app.permanent_session_lifetime = timedelta(minutes=3)
+app.permanent_session_lifetime = timedelta(days=7)
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
     if "user" in session:
+        flash("You are already logged in")
         return redirect(url_for("profile"))    
     if request.method == 'POST':
         session.permanent = True
@@ -28,8 +29,15 @@ def profile():
     arr = ["","","","",""]
     if "user" in session:
         arr = [session["user"], session["password"], session["mbti"], session["dnd"], session["types"]]
+    else:
+        flash("You need to log in")
+        return redirect(url_for("main"))
     if request.method == 'POST':
-        if request.form.get("mbti"):
+        if request.form.get("logout"):
+            session.clear()
+            flash("You have logged out")
+            return redirect(url_for("main"))
+        elif request.form.get("mbti"):
             session["mbti"] = arr[2] = functions.detect(0) 
         elif request.form.get("dnd"):
             session["dnd"] = arr[3] = functions.detect(1)

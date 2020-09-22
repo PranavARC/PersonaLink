@@ -1,27 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>
-        PersonalityLink
-    </title>
-</head>
-<body>
-    <p>
-        Your username is {{arr[0]}} and your password is {{arr[1]}}
-    </p>
-    <form action="" method="POST">
-        <div>
-            <label>MBTI: {{arr[2]}}</label>
-            <input type="submit" name="mbti" value="mbti">
-        </div>
-        <div>
-            <label>DND: {{arr[3]}}</label>
-            <input type="submit" name="dnd" value="dnd">
-        </div>
-        <div>
-            <label>Enneagram: {{arr[4]}}</label>
-            <input type="submit" name="type" value="type">
-        </div>
-    </form>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<p>
+    Your username is {{arr[0]}} and your password is {{arr[1]}}
+</p>
+<form action="" method="POST">
+    <div>
+        <label>MBTI: {{arr[2]}}</label>
+        <input type="submit" name="mbti" value="mbti">
+    </div>
+    <div>
+        <label>DND: {{arr[3]}}</label>
+        <input type="submit" name="dnd" value="dnd">
+    </div>
+    <div>
+        <label>Enneagram: {{arr[4]}}</label>
+        <input type="submit" name="type" value="type">
+    </div>
+    <br>
+    <br>
+    <input type="submit" name="logout" value="Logout">
+</form>
+{% endblock %}
