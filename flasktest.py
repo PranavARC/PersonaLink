@@ -1,12 +1,17 @@
 from flask import Flask, request, redirect, url_for, render_template, session
+from datetime import timedelta
 import functions
 
 app = Flask(__name__)
 app.secret_key = "bro"
+app.permanent_session_lifetime = timedelta(minutes=3)
 
 @app.route('/', methods=['GET', 'POST'])
 def bruh():
+    if "user" in session:
+        return redirect(url_for("send"))    
     if request.method == 'POST':
+        session.permanent = True
         user = request.form["username"]
         password = request.form["password"]
         session["user"] = user
