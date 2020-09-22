@@ -7,19 +7,19 @@
 </head>
 <body>
     <p>
-        Your username is {{usr}} and your password is {{word}}
+        Your username is {{arr[0]}} and your password is {{arr[1]}}
     </p>
     <form action="" method="POST">
         <div>
-            <label>MBTI: {{mbti}}</label>
+            <label>MBTI: {{arr[2]}}</label>
             <input type="submit" name="mbti" value="mbti">
         </div>
         <div>
-            <label>DND: {{dnd}}</label>
+            <label>DND: {{arr[3]}}</label>
             <input type="submit" name="dnd" value="dnd">
         </div>
         <div>
-            <label>Enneagram: {{type}}</label>
+            <label>Enneagram: {{arr[4]}}</label>
             <input type="submit" name="type" value="type">
         </div>
     </form>

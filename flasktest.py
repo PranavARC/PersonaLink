@@ -1,25 +1,36 @@
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template, session
 import functions
 
 app = Flask(__name__)
+app.secret_key = "bro"
 
 @app.route('/', methods=['GET', 'POST'])
 def bruh():
     if request.method == 'POST':
         user = request.form["username"]
         password = request.form["password"]
-        return redirect(url_for("send", mbti = "?", dnd = "?", types = "?", usr = user, word = password))
+        session["user"] = user
+        session["password"] = password
+        session["mbti"] = "?"
+        session["dnd"] = "?"
+        session["types"] = "?"
+        return redirect(url_for("send"))
     else:
         return render_template("root.html")
 
-@app.route('/login-<usr>-<word>-<mbti>-<dnd>-<types>', methods=['GET', 'POST'])
-def send(mbti, dnd, types, usr, word):
-    mb = mbti
-    dn = dnd
-    typ = types
+@app.route('/login', methods=['GET', 'POST'])
+def send():
+    arr = ["","","","",""]
+    if "user" in session:
+        arr = [session["user"], session["password"], session["mbti"], session["dnd"], session["types"]]
     if request.method == 'POST':
-        mb = functions.detect(0)
-    return render_template("login.html", mbti = mb, dnd = dn, type = typ, usr = usr, word = word)
+        if request.form.get("mbti"):
+            session["mbti"] = arr[2] = functions.detect(0) 
+        elif request.form.get("dnd"):
+            session["dnd"] = arr[3] = functions.detect(1)
+        elif request.form.get("type"):
+            session["types"] = arr[4] = functions.detect(2)
+    return render_template("login.html", arr = arr)
 
 # @app.route("/<name>")
 # def rando(name):
