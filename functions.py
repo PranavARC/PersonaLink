@@ -76,7 +76,8 @@ def enneagram(driver, url):
     result = (driver.find_elements_by_tag_name('p')[4]).text
     begin = result.find("Your primary type is ") + len("Your primary type is ")
     end = result.find(".", begin)
-    return("Type " + result[begin:end])
+    convert = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8, 'Nine': 9}
+    return convert[result[begin:end]]
     
 
 def detect(site):
@@ -95,4 +96,4 @@ def detect(site):
         driver.quit()
         return answer
     except:
-        return("Something went wrong, please try again")
+        return("?") # ("Something went wrong, please try again")
