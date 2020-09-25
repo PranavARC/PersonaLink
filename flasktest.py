@@ -29,17 +29,22 @@ class users(db.Model):
 def main():
     if "user" in session:
         flash("You are already logged in")
-        return redirect(url_for("profile"))
+        return redirect(url_for("profile", name=session["user"]))
 
     if request.method == 'POST':
         session.permanent = True
-        user = request.form["username"]
-        password = request.form["password"]
+        user = (request.form["username"]).strip()
+        password = request.form["password"].strip()
+        if(user == "" or password == ""):
+            flash("Please fill out both fields")
+            return redirect(url_for("main"))
+        if(user.find(" ") != -1):
+            flash("No whitespace allowed in username")
+            return redirect(url_for("main"))
 
-        found_user = users.query.filter_by(user=user).first()
-
+        found_user = users.query.filter_by(user=user.lower()).first()
         if not(found_user):
-            usr = users(user, password)
+            usr = users(user.lower(), password)
             db.session.add(usr)
             db.session.commit()
         else:
@@ -47,37 +52,34 @@ def main():
                 flash("Incorrect password")
                 return render_template("root.html")
         
-        found_user = users.query.filter_by(user=user).first()
+        found_user = users.query.filter_by(user=user.lower()).first()
 
-        session["user"] = user
-        return redirect(url_for("profile"))
-        """
-        if(found_user):
-            if(found_user.pwd == password):
-                session["user"] = user
-                session["password"] = password
-                session["mbti"] = found_user.mbti
-                session["dnd"] = found_user.dnd
-                session["types"] = found_user.types
-                return redirect(url_for("profile"))
-            else:
-                flash("Incorrect password")
-        else:
-            usr = users(user, password)
-            db.session.add(usr)
-            db.session.commit()
-        """
+        session["user"] = user.lower()
+        return redirect(url_for("profile", name=user))
     return render_template("root.html")
 
-@app.route('/my-profile', methods=['GET', 'POST'])
-def profile():
-    if "user" in session:
-        found_user = users.query.filter_by(user=session["user"]).first()
-    else:
-        flash("You need to log in")
-        return redirect(url_for("main"))
+@app.route('/<name>', methods=['GET', 'POST'])
+def profile(name):
+
+    # found_user = users.query.filter_by(user={name}).first()
+    # if not(found_user):
+    #     return redirect(url_for("profile"))
+    check=""
+    status = 0
+    if "user" not in session:
+        status = 1
+    elif session["user"] != name.lower():
+        status = 2
+
+    found_user = users.query.filter_by(user=name.lower()).first()
 
     if request.method == 'POST':
+        if status == 1:
+            return redirect(url_for("main"))
+        elif status == 2:
+            flash("You have reached your own account")
+            return redirect(url_for("profile", name=session["user"]))
+
         if request.form.get("logout"):
             session.clear()
             flash("You have logged out")
@@ -95,7 +97,15 @@ def profile():
             flash("Something went wrong, please try again")
             db.session.rollback()
 
-    arr = [found_user.user, found_user.pwd, found_user.mbti, found_user.dnd, found_user.types]
+    arr = [name, found_user.mbti, found_user.dnd, found_user.types, "Logout", found_user.pwd]
+
+    if status > 0:
+        arr[5] = "***"
+        if status == 1:
+            arr[4] = "Login"
+        else:
+            arr[4] = "Your profile"
+        return render_template("stranger.html", arr = arr)
     return render_template("profile.html", arr = arr)
 
 if __name__ == "__main__":
