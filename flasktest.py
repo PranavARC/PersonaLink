@@ -97,7 +97,10 @@ def profile(name):
             flash("Something went wrong, please try again")
             db.session.rollback()
 
-    arr = [name, found_user.mbti, found_user.dnd, found_user.types, "Logout", found_user.pwd]
+    # Errors pile up from arr without this, likely because the compiler has a possibility of checking a none-type
+    arr = ["", "", "", "", "", ""]
+    if(found_user is not None):
+        arr = [name, found_user.mbti, found_user.dnd, found_user.types, "Logout", found_user.pwd]
 
     if status > 0:
         arr[5] = "***"
