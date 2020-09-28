@@ -9,13 +9,16 @@ app = Flask(__name__)
 def main():
     arr = []
     nums = []
+
     if request.method == 'POST':
         opinions = []
         for i in range(60):
             opinions.append(int(request.form["opinion"+str(i)]))
+        print(opinions)
         driverM = mbti2.headlessMbti()
         print(mbti2.mbtiSubmit(driverM, opinions))
         driverM.quit()
+
     driver = mbti2.headlessMbti()
     arr = mbti2.mbtiScrape(driver)
     driver.quit()
@@ -23,7 +26,7 @@ def main():
     for i in arr:
         nums.append(j)
         j += 1
-    return render_template("idk.html", qs = arr, nums = nums)
+    return render_template("mbti.html", qs = arr, nums = nums)
 
 if __name__ == "__main__":
     app.run(debug=True)

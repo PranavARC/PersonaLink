@@ -10,14 +10,15 @@ import time
 # URL for MBTI personality test
 url = "https://www.16personalities.com/free-personality-test"
 
+# For debug purposes
 select = {
-    1 : "option disagree max",
-    2 : "option disagree med",
-    3 : "option disagree min",
-    4 : "option neutral",
-    5 : "option agree min",
-    6 : "option agree med",
-    7 : "option agree max"
+    0 : "option agree max",
+    1 : "option agree med",
+    2 : "option agree min",
+    3 : "option neutral",
+    4 : "option disagree min",
+    5 : "option disagree med",
+    6 : "option disagree max"
 }
 
 # Make sure the Firefox window is launched headless
@@ -49,13 +50,15 @@ def mbtiScrape(driver):
 
 def mbtiSubmit(driver, arr):
     page = 1
+    qno = 0
     while(driver.current_url == url):
         qs = driver.find_elements_by_class_name("question")
         size = len(qs)
         start = 0
         while(start < size):
-            choice = arr[start]# random.randint(1,7)
-            btns = driver.find_elements(By.CSS_SELECTOR,"[data-index='" + str(choice-1) + "']")
+            choice = arr[qno]# random.randint(7)
+            print(select[choice])
+            btns = driver.find_elements(By.CSS_SELECTOR,"[data-index='" + str(choice) + "']")
             if(start == 0):
                 driver.execute_script("window.scrollTo(0, 0)")
                 btns[start].click()
@@ -63,6 +66,7 @@ def mbtiSubmit(driver, arr):
                 # doesn't work for Firefox
             else:
                 btns[start].click()
+            qno += 1
             start += 1
         if(page == 10):
             proceed = driver.find_element(By.CSS_SELECTOR,"[dusk='submit-button']")
