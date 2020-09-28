@@ -2,3 +2,4 @@ debug.log
 tempCodeRunnerFile.py
 __pycache__
 executor.py
+geckodriver.log
