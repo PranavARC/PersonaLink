@@ -1,10 +1,7 @@
 from selenium import webdriver
-from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from urllib.request import urlopen
-from webbrowser import open
-import selenium.common.exceptions as selerr
-import random
+# import random
 import time
 
 # URL for MBTI personality test
