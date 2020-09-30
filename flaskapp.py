@@ -137,6 +137,7 @@ def mbtiPg(name):
             flash("Something went wrong, please try again")
             driverM.quit()
             return redirect(url_for("profile", name=session["user"]))
+
         driverM.quit()
         found_user = users.query.filter_by(user=name.lower()).first()
         found_user.mbti = check
@@ -155,6 +156,14 @@ def mbtiPg(name):
 
 @app.route('/<name>-dnd', methods=['GET', 'POST'])
 def dndPg(name):
+    if "user" not in session:
+        flash("Please log in")
+        return redirect(url_for("main"))
+    elif session["user"] != name.lower():
+        flash("Invalid page")
+        return redirect(url_for("profile", name=session["user"]))
+
+    check = "?"
     arr = []
     nums = []
 
@@ -166,9 +175,20 @@ def dndPg(name):
             except:
                 val = 0
             opinions.append(val)
-        driver = functions2.headless(1)
-        print(functions2.dndSubmit(driver, opinions))
-        driver.quit()
+        driverD = functions2.headless(1)
+        try:
+            check = functions2.dndSubmit(driverD, opinions)
+        except:
+            flash("Something went wrong, please try again")
+            driverD.quit()
+            return redirect(url_for("profile", name=session["user"]))
+        
+        driverD.quit()
+        found_user = users.query.filter_by(user=name.lower()).first()
+        found_user.dnd = check
+        db.session.commit()
+        flash("Your DND alignment is " + check)
+        return redirect(url_for("profile", name=session["user"]))
 
     driver = functions2.headless(1)
     arr = functions2.dndScrape(driver)
@@ -181,6 +201,14 @@ def dndPg(name):
 
 @app.route('/<name>-gram', methods=['GET', 'POST'])
 def gramPg(name):
+    if "user" not in session:
+        flash("Please log in")
+        return redirect(url_for("main"))
+    elif session["user"] != name.lower():
+        flash("Invalid page")
+        return redirect(url_for("profile", name=session["user"]))
+
+    check = "?"
     arr = []
     nums = []
 
@@ -192,9 +220,23 @@ def gramPg(name):
             val = int(val[-1])
             opinions[0].append(name)
             opinions[1].append(val)
-        driver = functions2.headless(2)
-        print(functions2.gramSubmit(driver, opinions))
-        driver.quit()
+        # driver = functions2.headless(2)
+        # print(functions2.gramSubmit(driver, opinions))
+        # driver.quit()
+        driverG = functions2.headless(2)
+        try:
+            check = functions2.gramSubmit(driverG, opinions)
+        except:
+            flash("Something went wrong, please try again")
+            driverG.quit()
+            return redirect(url_for("profile", name=session["user"]))
+        
+        driverG.quit()
+        found_user = users.query.filter_by(user=name.lower()).first()
+        found_user.types = check
+        db.session.commit()
+        flash("Your Enneagram type is " + check)
+        return redirect(url_for("profile", name=session["user"]))
     
     driver = functions2.headless(2)
     arr = functions2.gramScrape(driver)
