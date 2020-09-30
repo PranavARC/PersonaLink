@@ -16,7 +16,7 @@ class users(db.Model):
     pwd = db.Column(db.String(100))
     mbti = db.Column(db.String(6))
     dnd = db.Column(db.String(15))
-    types = db.Column(db.String(6))
+    types = db.Column(db.String(10))
 
     def __init__(self, user, pwd):
         self.user = user
@@ -216,9 +216,9 @@ def gramPg(name):
         opinions = [[], []]
         for i in range(52):
             val = request.form["q"+str(i)]
-            name = val[:val.find("--")]
+            title = val[:val.find("--")]
             val = int(val[-1])
-            opinions[0].append(name)
+            opinions[0].append(title)
             opinions[1].append(val)
         # driver = functions2.headless(2)
         # print(functions2.gramSubmit(driver, opinions))
