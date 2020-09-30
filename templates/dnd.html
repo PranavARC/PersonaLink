@@ -1,21 +1,12 @@
-<!DOCTYPE html>
-<html>
-<title>
-    I'm stuff
-</title>
-<body>
-    <form action="" method="POST">
-        <input type="submit" name="Go" value="Go">
-    <br>
-    {% for i in nums %}
-        {{qs[i][0]}}<br>
-        <input type="radio" value="1" name="q{{i}}">{{qs[i][1]}}<br>
-        <input type="radio" value="2" name="q{{i}}">{{qs[i][2]}}<br>
-        <input type="radio" value="3" name="q{{i}}">{{qs[i][3]}}<br>
-        <input type="radio" value="4" name="q{{i}}">{{qs[i][4]}}<br>
-        <br>
-        <br>
-    {% endfor %}
-    </form>
-</body>
-</html>
+{% extends "survey.html" %}
+{% block test %}
+{% for i in nums %}
+{{qs[i][0]}}<br>
+<input type="radio" value="1" name="q{{i}}">{{qs[i][1]}}<br>
+<input type="radio" value="2" name="q{{i}}">{{qs[i][2]}}<br>
+<input type="radio" value="3" name="q{{i}}">{{qs[i][3]}}<br>
+<input type="radio" value="4" name="q{{i}}">{{qs[i][4]}}<br>
+<br>
+<br>
+{% endfor %}
+{% endblock %}

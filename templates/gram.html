@@ -1,31 +1,22 @@
-<!DOCTYPE html>
-<html>
-<title>
-    I'm stuff
-</title>
-<body>
-    <form action="" method="POST">
-        <input type="submit" name="Go" value="Go">
-    <br>
-    <table border="0" cellspacing="0" cellpadding="0">
-        <tbody>
-        {% for i in nums %}
-            <tr>
-                <td>{{qs[0][i]}}</td>
-                <td width="10">&nbsp;</td>
-                <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--0"></td>
-                <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--1"></td>
-                <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--2"></td>
-                <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--3" checked></td>
-                <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--4"></td>
-                <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--5"></td>
-                <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--6"></td>
-                <td width="10">&nbsp;</td>
-                <td>{{qs[1][i]}}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    </form>
-</body>
-</html>
+{% extends "survey.html" %}
+{% block test %}
+<table border="0" cellspacing="0" cellpadding="0">
+    <tbody>
+    {% for i in nums %}
+        <tr>
+            <td>{{qs[0][i]}}</td>
+            <td width="10">&nbsp;</td>
+            <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--0"></td>
+            <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--1"></td>
+            <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--2"></td>
+            <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--3" checked></td>
+            <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--4"></td>
+            <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--5"></td>
+            <td><input type="radio" name="q{{i}}" value="{{qs[0][i]}}--6"></td>
+            <td width="10">&nbsp;</td>
+            <td>{{qs[1][i]}}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
