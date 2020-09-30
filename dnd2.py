@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import random
 
 # URL for DND alignment test
 url = "http://easydamus.com/alignmenttest.html"

@@ -28,21 +28,16 @@ def headlessMbti():
 
 def mbtiScrape(driver):
     arr = []
-    page = 1
     qno = 1
-    while(driver.current_url == url):
+    while(True):   # Keep scraping till the next button is replaced by submit button 
         qs = driver.find_elements_by_class_name("statement")
         for i in qs:
-            arr.append(str(qno) + ". " + i.text)
+            arr.append(str(qno) + ". " + i.text)    # [question #]. [question] 
             qno += 1
-        try:
-            proceed = driver.find_element(By.CSS_SELECTOR,"[dusk='next-button']")
-            proceed.click()
-        except:
-            break
-        page += 1
-    # for i in arr:
-    #     print(i)
+        proceed = driver.find_elements(By.CSS_SELECTOR,"[dusk='next-button']")
+        if(len(proceed) == 0):
+            break   # No next button found, so last page reached
+        proceed[0].click()
     return arr
 
 def mbtiSubmit(driver, arr):
