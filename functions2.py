@@ -158,4 +158,4 @@ def gramSubmit(driver, arr):
     btn = driver.find_element_by_css_selector("input[name='subm']")
     btn.click()
     final = driver.find_element_by_css_selector("a[title='link opens in new window']")
-    return (final.text[5])
+    return ("Type " + final.text[5])
