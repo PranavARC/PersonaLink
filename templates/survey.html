@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html>
-<title>
-    PersonaLink
-</title>
-<body>
-    <form action="" method="POST">
-        {% block test %}{% endblock %}
-        <br>
-        <input type="submit" name="Go" value="Go">
-    </form>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<form action="" method="POST">
+    {% block test %}{% endblock %}
+    <br>
+    <input type="submit" name="Go" value="Go">
+</form>
+{% endblock %}

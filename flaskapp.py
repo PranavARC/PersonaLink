@@ -3,6 +3,7 @@ from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
 import functions2
 
+# Flask and SQLAlchemy code
 app = Flask(__name__)
 app.secret_key = "hello"
 app.permanent_session_lifetime = timedelta(days=7)
@@ -42,17 +43,17 @@ def main():
             flash("No whitespace allowed in username")
             return redirect(url_for("main"))
 
-        found_user = users.query.filter_by(user=user.lower()).first()
-        if not(found_user):
+        foundUser = users.query.filter_by(user=user.lower()).first()
+        if not(foundUser):
             usr = users(user.lower(), password)
             db.session.add(usr)
             db.session.commit()
         else:
-            if(found_user.pwd != password):
+            if(foundUser.pwd != password):
                 flash("Incorrect password")
                 return render_template("root.html")
         
-        found_user = users.query.filter_by(user=user.lower()).first()
+        foundUser = users.query.filter_by(user=user.lower()).first()
 
         session["user"] = user.lower()
         return redirect(url_for("profile", name=user))
@@ -60,14 +61,14 @@ def main():
 
 @app.route('/<name>', methods=['GET', 'POST'])
 def profile(name):
-    check=""
+    check = ""
     status = 0
     if "user" not in session:
         status = 1
     elif session["user"] != name.lower():
         status = 2
 
-    found_user = users.query.filter_by(user=name.lower()).first()
+    foundUser = users.query.filter_by(user=name.lower()).first()
 
     if request.method == 'POST':
         if status == 1:
@@ -83,24 +84,16 @@ def profile(name):
             return redirect(url_for("main"))
         elif request.form.get("mbti"):
             return redirect(url_for("mbtiPg", name=name))
-            #check = found_user.mbti = functions.detect(0)
         elif request.form.get("dnd"):
             return redirect(url_for("dndPg", name=name))
-            # check = found_user.dnd = functions.detect(1)
         elif request.form.get("type"):
             return redirect(url_for("gramPg", name=name))
-            # check = found_user.types = functions.detect(2)
-            
-        # if(check != "?"):
-        #     db.session.commit()
-        # else:
-        #     flash("Something went wrong, please try again")
-        #     db.session.rollback()
 
-    # Errors pile up from arr without this, likely because the compiler has a possibility of checking a none-type
+    # Errors pile up from arr without this,
+    # likely because the compiler has a possibility of checking a none-type
     arr = ["", "", "", "", "", ""]
-    if(found_user is not None):
-        arr = [name, found_user.mbti, found_user.dnd, found_user.types, "Logout", found_user.pwd]
+    if(foundUser is not None):
+        arr = [name, foundUser.mbti, foundUser.dnd, foundUser.types, "Logout", foundUser.pwd]
 
     if status > 0:
         arr[5] = "***"
@@ -139,8 +132,8 @@ def mbtiPg(name):
             return redirect(url_for("profile", name=session["user"]))
 
         driverM.quit()
-        found_user = users.query.filter_by(user=name.lower()).first()
-        found_user.mbti = check
+        foundUser = users.query.filter_by(user=name.lower()).first()
+        foundUser.mbti = check
         db.session.commit()
         flash("Your MBTI type is " + check)
         return redirect(url_for("profile", name=session["user"]))
@@ -184,8 +177,8 @@ def dndPg(name):
             return redirect(url_for("profile", name=session["user"]))
         
         driverD.quit()
-        found_user = users.query.filter_by(user=name.lower()).first()
-        found_user.dnd = check
+        foundUser = users.query.filter_by(user=name.lower()).first()
+        foundUser.dnd = check
         db.session.commit()
         flash("Your DND alignment is " + check)
         return redirect(url_for("profile", name=session["user"]))
@@ -220,9 +213,6 @@ def gramPg(name):
             val = int(val[-1])
             opinions[0].append(title)
             opinions[1].append(val)
-        # driver = functions2.headless(2)
-        # print(functions2.gramSubmit(driver, opinions))
-        # driver.quit()
         driverG = functions2.headless(2)
         try:
             check = functions2.gramSubmit(driverG, opinions)
@@ -232,8 +222,8 @@ def gramPg(name):
             return redirect(url_for("profile", name=session["user"]))
         
         driverG.quit()
-        found_user = users.query.filter_by(user=name.lower()).first()
-        found_user.types = check
+        foundUser = users.query.filter_by(user=name.lower()).first()
+        foundUser.types = check
         db.session.commit()
         flash("Your Enneagram type is " + check)
         return redirect(url_for("profile", name=session["user"]))
