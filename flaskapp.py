@@ -237,6 +237,11 @@ def gramPg(name):
         j += 1    
     return render_template("gram.html", qs = arr, nums = nums)
 
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.clear()
+    flash("You have logged out")
+    return redirect(url_for("main"))
 
 if __name__ == "__main__":
     db.create_all()
