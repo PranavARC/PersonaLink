@@ -61,8 +61,11 @@ def mbtiSubmit(driver, arr):
             btns = driver.find_elements(By.CSS_SELECTOR,"[data-index='" + str(choice) + "']")
             if(pgQNo == 0):
                 driver.execute_script("window.scrollTo(0, 0)")  # Scroll to top of page for first q
-            webdriver.ActionChains(driver).move_to_element(btns[pgQNo]).click(btns[pgQNo]).perform()
-            # btns[pgQNo].click() for Firefox
+            # webdriver.ActionChains(driver).move_to_element(btns[pgQNo]).click(btns[pgQNo]).perform()
+            try:
+                btns[pgQNo].click() # for Firefox
+            except:
+                webdriver.ActionChains(driver).move_to_element(btns[pgQNo]).click(btns[pgQNo]).perform()
             qNo += 1
             pgQNo += 1
 
@@ -70,7 +73,11 @@ def mbtiSubmit(driver, arr):
             proceed = driver.find_element(By.CSS_SELECTOR,"[dusk='submit-button']")
         else:
             proceed = driver.find_element(By.CSS_SELECTOR,"[dusk='next-button']")
-        proceed.click()
+
+        try:
+            proceed.click()
+        except:
+            webdriver.ActionChains(driver).move_to_element(proceed).click(proceed).perform()
         time.sleep(0.5) # So the new page loads (will improve this later)
         page += 1
 
