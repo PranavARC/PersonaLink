@@ -10,9 +10,18 @@ URLS = [
 
 # Open a headless browser for each case
 def headless(site):
-    fireFoxOptions = webdriver.FirefoxOptions()
-    fireFoxOptions.add_argument("--headless")
-    driver = webdriver.Firefox(options=fireFoxOptions)
+    # Check whichever works
+    # chromeOptions = webdriver.chrome.options.Options()
+    chromeOptions = webdriver.ChromeOptions()
+    chromeOptions.add_argument("--headless")
+    chromeOptions.add_argument("--window-size=1920x1080")
+    chromeOptions.add_argument("start-maximised")
+    driver = webdriver.Chrome(options=chromeOptions)
+
+    # To use Mozilla Firefox instead
+    # fireFoxOptions = webdriver.FirefoxOptions()
+    # fireFoxOptions.add_argument("--headless")
+    # driver = webdriver.Firefox(options=fireFoxOptions)
     driver.get(URLS[site])
     return driver
 
@@ -29,7 +38,9 @@ def mbtiScrape(driver):
         proceed = driver.find_elements(By.CSS_SELECTOR,"[dusk='next-button']")
         if(len(proceed) == 0):
             break   # No next button found, so last page reached
-        proceed[0].click()
+        webdriver.ActionChains(driver).move_to_element(proceed[0]).click(proceed[0]).perform()
+        # proceed[0].click() for Firefox
+        time.sleep(0.5) # So the new page loads
 
     return arr
 
@@ -50,7 +61,8 @@ def mbtiSubmit(driver, arr):
             btns = driver.find_elements(By.CSS_SELECTOR,"[data-index='" + str(choice) + "']")
             if(pgQNo == 0):
                 driver.execute_script("window.scrollTo(0, 0)")  # Scroll to top of page for first q
-            btns[pgQNo].click()
+            webdriver.ActionChains(driver).move_to_element(btns[pgQNo]).click(btns[pgQNo]).perform()
+            # btns[pgQNo].click() for Firefox
             qNo += 1
             pgQNo += 1
 
@@ -59,8 +71,7 @@ def mbtiSubmit(driver, arr):
         else:
             proceed = driver.find_element(By.CSS_SELECTOR,"[dusk='next-button']")
         proceed.click()
-        if(page == 10): # sleep before trying to scrape the answer to prevent errors
-            time.sleep(0.5)
+        time.sleep(0.5) # So the new page loads (will improve this later)
         page += 1
 
     time.sleep(0.5)
