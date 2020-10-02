@@ -1,33 +1,45 @@
-import re
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+import random
+import time
 
-# URL for Enneagram test, and results page
-url = "https://www.truity.com/test/enneagram-personality-test"
-endurl = re.compile("https://www.truity.com/personality-test/[0-9]+/test-results/[0-9]+")
+# URL for Enneagram type test
+url = "https://www.eclecticenergies.com/enneagram/test-2"
 
-# Make sure the Chrome window is launched as an app (without navigation buttons or address bar)
-opts = Options()
-opts.add_argument("--app=" + url)
-driver = webdriver.Chrome(options = opts)
-driver.get(url)
+# Make sure the Firefox window is launched headless
+def headlessGram():
+    fireFoxOptions = webdriver.FirefoxOptions()
+    fireFoxOptions.add_argument("--headless")
+    driver = webdriver.Firefox(options=fireFoxOptions)
+    driver.get(url)
+    return driver
 
-while(True):
-    # To deal with the user opening pop-ups
-    handles = driver.window_handles
-    if(len(handles) > 1):
-        driver.switch_to.window(handles[1])
-        driver.close()
-        driver.switch_to.window(handles[0])
+def gramScrape(driver):
+    driver.find_element_by_class_name("button").click()
+    time.sleep(0.5)
+    lefts = driver.find_elements_by_class_name("l")
+    rights = driver.find_elements_by_class_name("r")
+    lefttext = []
+    righttext = []
+    for i in lefts:
+        lefttext.append(i.text)
+    for i in rights:
+        righttext.append(i.text)
+    arr = [lefttext, righttext]
+    return arr
 
-    if(driver.current_url != url):
-        if not(endurl.match(driver.current_url)):
-            driver.get(url)
-        elif(len(driver.find_elements_by_tag_name('h3')) > 0):
-            break
 
-result = (driver.find_elements_by_tag_name('p')[4]).text
-begin = result.find("Your primary type is ") + len("Your primary type is ")
-end = result.find(".", begin)
-print("Type " + result[begin:end])
-driver.quit()
+def gramSubmit(driver, arr):
+    # You can probs reuse gramScrape()
+    driver.find_element_by_class_name("button").click()
+    time.sleep(0.5)
+    lefts = driver.find_elements_by_class_name("l")
+    for i in lefts:
+        no = arr[0].index(i.text) # arr[0] is the array of names, arr[1] is the arr of vals
+        print(str(no) + " - " + i.text + " - Value was " + str(arr[1][no]))
+        btn = driver.find_element_by_css_selector("[name='q" + str(lefts.index(i)) + "'][value='"+str(arr[1][no])+"']")
+        btn.click()
+    btn = driver.find_element_by_css_selector("input[name='subm']")
+    btn.click()
+    final = driver.find_element_by_css_selector("a[title='link opens in new window']")
+    return ("Your type is Type " + final.text[5])

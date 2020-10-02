@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template, session, flash
 from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
-import functions2
+import functions
 
 # Flask and SQLAlchemy code
 app = Flask(__name__)
@@ -51,13 +51,13 @@ def main():
         else:
             if(foundUser.pwd != password):
                 flash("Incorrect password")
-                return render_template("root.html")
+                return render_template("login.html")
         
         foundUser = users.query.filter_by(user=user.lower()).first()
 
         session["user"] = user.lower()
         return redirect(url_for("profile", name=user))
-    return render_template("root.html")
+    return render_template("login.html")
 
 @app.route('/<name>', methods=['GET', 'POST'])
 def profile(name):
@@ -123,9 +123,9 @@ def mbtiPg(name):
         for i in range(60):
             opinions.append(int(request.form["opinion"+str(i)]))
         # print(opinions)
-        driverM = functions2.headless(0)
+        driverM = functions.headless(0)
         try:
-            check = functions2.mbtiSubmit(driverM, opinions)
+            check = functions.mbtiSubmit(driverM, opinions)
         except:
             flash("Something went wrong, please try again")
             driverM.quit()
@@ -138,8 +138,8 @@ def mbtiPg(name):
         flash("Your MBTI type is " + check)
         return redirect(url_for("profile", name=session["user"]))
 
-    driver = functions2.headless(0)
-    arr = functions2.mbtiScrape(driver)
+    driver = functions.headless(0)
+    arr = functions.mbtiScrape(driver)
     driver.quit()
     j = 0
     for i in arr:
@@ -168,9 +168,9 @@ def dndPg(name):
             except:
                 val = 0
             opinions.append(val)
-        driverD = functions2.headless(1)
+        driverD = functions.headless(1)
         try:
-            check = functions2.dndSubmit(driverD, opinions)
+            check = functions.dndSubmit(driverD, opinions)
         except:
             flash("Something went wrong, please try again")
             driverD.quit()
@@ -183,8 +183,8 @@ def dndPg(name):
         flash("Your DND alignment is " + check)
         return redirect(url_for("profile", name=session["user"]))
 
-    driver = functions2.headless(1)
-    arr = functions2.dndScrape(driver)
+    driver = functions.headless(1)
+    arr = functions.dndScrape(driver)
     driver.quit()
     j = 0
     for i in arr:
@@ -213,9 +213,9 @@ def gramPg(name):
             val = int(val[-1])
             opinions[0].append(title)
             opinions[1].append(val)
-        driverG = functions2.headless(2)
+        driverG = functions.headless(2)
         try:
-            check = functions2.gramSubmit(driverG, opinions)
+            check = functions.gramSubmit(driverG, opinions)
         except:
             flash("Something went wrong, please try again")
             driverG.quit()
@@ -228,8 +228,8 @@ def gramPg(name):
         flash("Your Enneagram type is " + check)
         return redirect(url_for("profile", name=session["user"]))
     
-    driver = functions2.headless(2)
-    arr = functions2.gramScrape(driver)
+    driver = functions.headless(2)
+    arr = functions.gramScrape(driver)
     driver.quit()
     j = 0
     for i in arr[0]:

@@ -1,99 +1,172 @@
-import re
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import selenium.common.exceptions as selerr
-URLS = ["https://www.16personalities.com/free-personality-test",
-"http://easydamus.com/alignmenttest.html",
-"https://www.truity.com/test/enneagram-personality-test"
+from selenium.webdriver.common.by import By
+import time
+
+URLS = [
+    "https://www.16personalities.com/free-personality-test",
+    "http://easydamus.com/alignmenttest.html",
+    "https://www.eclecticenergies.com/enneagram/test-2"
 ]
 
-def mbti(driver, url):
-    while(driver.current_url == url):
-        pass
+# Open a headless browser for each case
+def headless(site):
+    # Check whichever works
+    # chromeOptions = webdriver.chrome.options.Options()
+    chromeOptions = webdriver.ChromeOptions()
+    chromeOptions.add_argument("--headless")
+    chromeOptions.add_argument("--window-size=1920x1080")
+    chromeOptions.add_argument("start-maximised")
+    driver = webdriver.Chrome(options=chromeOptions)
 
-    # Go to the results page once the survey is over
-    driver.get("https://www.16personalities.com/profile")
+    # To use Mozilla Firefox instead
+    # fireFoxOptions = webdriver.FirefoxOptions()
+    # fireFoxOptions.add_argument("--headless")
+    # driver = webdriver.Firefox(options=fireFoxOptions)
+    driver.get(URLS[site])
+    return driver
 
-    # If the user clicked on a random link while doing the survey, an error will occur
-    # So go back to the survey page and try again
-    try:
-        result = driver.find_elements_by_tag_name("td")[4]
-        code = result.text
-    except IndexError:
-        driver.get(url)
-        return mbti(driver, url)
-    else:
-        return(code)
+def mbtiScrape(driver):
+    arr = []
+    qno = 1
 
-def dnd(driver, url):
-    handles = []
-    btn = driver.find_element_by_class_name("button")
-
-    # Wait till the user finishes the survey and a pop-up window appears, making a second window handle
+    # Keep scraping each page till the next button is replaced by submit button 
     while(True):
-        handles = driver.window_handles
-        if(len(handles) > 1):
-            break
-        if(driver.current_url != url):
-            driver.get(url)
+        qs = driver.find_elements_by_class_name("statement")    # class containing the questions
+        for i in qs:
+            arr.append(str(qno) + ". " + i.text)    # [question #]. [question] 
+            qno += 1
+        proceed = driver.find_elements(By.CSS_SELECTOR,"[dusk='next-button']")
+        if(len(proceed) == 0):
+            break   # No next button found, so last page reached
+        webdriver.ActionChains(driver).move_to_element(proceed[0]).click(proceed[0]).perform()
+        # proceed[0].click() for Firefox
+        time.sleep(0.5) # So the new page loads
 
-    # Switch to that window and extract the alignment
-    driver.switch_to.window(handles[1])
-    # An error will occur when closing the pop-up, so re-open it
-    while(True):
-        try:
-            result = driver.find_elements_by_tag_name("b")[1]
-        except selerr.NoSuchWindowException:
-            driver.switch_to.window(driver.window_handles[0])
-            btn.click()
-            driver.switch_to.window(driver.window_handles[1])
+    return arr
+
+def mbtiSubmit(driver, arr):
+    page = 1
+    qNo = 0 # overall question number
+
+    # Keep navigating pages until the result page is reached
+    while(driver.current_url == URLS[0]):
+        qs = driver.find_elements_by_class_name("question")
+        size = len(qs)
+        pgQNo = 0   # page question number
+
+        # Answer every question on the page
+        while(pgQNo < size):
+            choice = arr[qNo]   # arr has the user answer for each question
+            # Find every button of that value, and click the one corresponding to the question
+            btns = driver.find_elements(By.CSS_SELECTOR,"[data-index='" + str(choice) + "']")
+            if(pgQNo == 0):
+                driver.execute_script("window.scrollTo(0, 0)")  # Scroll to top of page for first q
+            webdriver.ActionChains(driver).move_to_element(btns[pgQNo]).click(btns[pgQNo]).perform()
+            # btns[pgQNo].click() for Firefox
+            qNo += 1
+            pgQNo += 1
+
+        if(page == 10): # Last page, use submit button to see results
+            proceed = driver.find_element(By.CSS_SELECTOR,"[dusk='submit-button']")
         else:
-            break
+            proceed = driver.find_element(By.CSS_SELECTOR,"[dusk='next-button']")
+        proceed.click()
+        time.sleep(0.5) # So the new page loads (will improve this later)
+        page += 1
+
+    time.sleep(0.5)
+    driver.get("https://www.16personalities.com/profile")   # results page
+    code = driver.find_elements_by_tag_name("td")[4].text
+    return(code)
+
+def dndScrape(driver):
+    qsArr = []
+    qs = driver.find_elements_by_class_name("question") # questions
+    opts = driver.find_elements_by_tag_name("p")    # options (elements)
+    trueOpts = []   # for the text of the options
+    
+    # Options text has new lines separating them and filler lines
+    # Separate them into individual options
+    for i in opts:
+        first = i.text.find('\n\n')
+        mainStr = i.text[first+2:]
+        while(True):
+            first = mainStr.find('\n')
+            if(first == -1):
+                trueOpts.append(mainStr)
+                break
+            trueOpts.append(mainStr[:first])
+            mainStr = mainStr[first+1:]
+
+    # Remove the filler lines
+    trueOpts = trueOpts[3:len(trueOpts)-2]
+    
+    # Create an array of [question, opt1, opt2, opt3, opt4, question2, ...]
+    i = 0
+    size = len(qs)
+    for i in range(size):
+        miniArr = []
+        miniArr.append(qs[i].text)
+        for j in range(4):
+            miniArr.append((trueOpts[4*i+j]))
+        qsArr.append(miniArr)
+    return qsArr
+
+def dndSubmit(driver, arr):
+    i = 0
+    size = len(arr)
+
+    while(i < size):
+        if(arr[i] == 0):    # if radio buttons provided no value, skip
+            i += 1
+            continue
+        namer = "q2" + "{0:0=2d}".format(i+1)   # names of questions: q201, q202, ...
+        
+        # Click the radio button of the corresponding question with the correct value
+        rad = driver.find_element(By.CSS_SELECTOR,"[name='"+namer+"'][value='"+str(arr[i])+"']")
+        rad.click()
+        i += 1
+    
+    # Click the submit button, switch to the pop-up window, and scrape the result
+    btn = driver.find_element_by_class_name("button")
+    btn.click()
+    handles = driver.window_handles
+    driver.switch_to.window(handles[1])
+    result = driver.find_elements_by_tag_name("b")[1]
     return(result.text)
 
-def enneagram(driver, url):
-    # An RE of the results page (unique for each test)
-    endurl = re.compile("https://www.truity.com/personality-test/[0-9]+/test-results/[0-9]+")
+def gramScrape(driver):
+    # Click the button to enter the test, and wait for the page to load
+    driver.find_element_by_class_name("button").click()
+    time.sleep(0.5)
 
-    # Until the user finishes the survey and until the survey page loads, wait
-    while(True):
-        # To deal with the user opening pop-ups
-        handles = driver.window_handles
-        if(len(handles) > 1):
-            driver.switch_to.window(handles[1])
-            try:
-                driver.close()
-            except selerr.NoSuchWindowException:
-                pass
-            driver.switch_to.window(handles[0])
+    # Scrape the left and right extremes of opinions
+    lefts = driver.find_elements_by_class_name("l")
+    rights = driver.find_elements_by_class_name("r")
+    leftText = []
+    rightText = []
+    for i in lefts:
+        leftText.append(i.text)
+    for i in rights:
+        rightText.append(i.text)
 
-        if(driver.current_url != url):
-            if not(endurl.match(driver.current_url)):
-                driver.get(url)
-            elif(len(driver.find_elements_by_tag_name('h3')) > 0):
-                break
+    # Return a 2D array of lefft and right extremes
+    arr = [leftText, rightText]
+    return arr
+
+def gramSubmit(driver, arr):
+    # Each time the page is opened, the questions relocate themselves
+    # Reuse gramScrape and take the left extremes to search for the new positions of questions
+    leftText = (gramScrape(driver))[0]
+
+    for i in leftText:
+        # Find the index where the value of the answer to our current question is stored
+        no = arr[0].index(i) # arr[0] is the array of left extremes, arr[1] is the arr of vals
+        btn = driver.find_element_by_css_selector("[name='q" + str(leftText.index(i)) + "'][value='"+str(arr[1][no])+"']")
+        btn.click()
     
-    result = (driver.find_elements_by_tag_name('p')[4]).text
-    begin = result.find("Your primary type is ") + len("Your primary type is ")
-    end = result.find(".", begin)
-    convert = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8, 'Nine': 9}
-    return convert[result[begin:end]]
-    
-
-def detect(site):
-    # Make sure the Chrome window is launched as an app (without navigation buttons or address bar)
-    opts = Options()
-    opts.add_argument("--app=" + URLS[site])
-    try:
-        driver = webdriver.Chrome(options = opts)
-        driver.get(URLS[site])
-        if(site == 0):
-            answer = mbti(driver, URLS[site])
-        elif(site == 1):
-            answer = dnd(driver, URLS[site])
-        elif(site == 2):
-            answer = enneagram(driver, URLS[site])
-        driver.quit()
-        return answer
-    except:
-        return("?") # ("Something went wrong, please try again")
+    # Click submit, scrape the type, and return
+    btn = driver.find_element_by_css_selector("input[name='subm']")
+    btn.click()
+    final = driver.find_element_by_css_selector("a[title='link opens in new window']")
+    return ("Type " + final.text[5])
