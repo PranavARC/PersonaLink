@@ -4,3 +4,4 @@ __pycache__
 executor.py
 geckodriver.log
 .vscode
+.DS_Store

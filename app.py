@@ -26,6 +26,9 @@ class users(db.Model):
         self.dnd = "?"
         self.types = "?"
 
+with app.app_context():
+    db.create_all()
+
 @app.route('/', methods=['GET', 'POST'])
 def main():
     if "user" in session:
@@ -244,5 +247,4 @@ def logout():
     return redirect(url_for("main"))
 
 if __name__ == "__main__":
-    db.create_all()
     app.run(debug=True)
