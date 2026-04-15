@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template, session, flash
 from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
+import bcrypt
 import functions
 
 # Flask and SQLAlchemy code
@@ -48,11 +49,12 @@ def main():
 
         foundUser = users.query.filter_by(user=user.lower()).first()
         if not(foundUser):
-            usr = users(user.lower(), password)
+            hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            usr = users(user.lower(), hashed)
             db.session.add(usr)
             db.session.commit()
         else:
-            if(foundUser.pwd != password):
+            if not(bcrypt.checkpw(password.encode('utf-8'), foundUser.pwd.encode('utf-8'))):
                 flash("Incorrect password")
                 return render_template("login.html")
         
